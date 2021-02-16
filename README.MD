@@ -54,6 +54,13 @@ dela.
 
 O programa acaba quando for chamada uma linha não existente
 
+## Execução
+Após escrever seu código em um arquivo `.mn`, você poderá executa-lo usando:
+```
+norma ARQUIVO.MN ENTRADA
+```
+Onde `norma` é o programa compilado.
+
 ## Melhorias esperadas
 
 - Implementar uma versão melhorada do intepretador
