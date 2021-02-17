@@ -27,7 +27,8 @@ O poder computacional dessa máquina é equivalente a máquina de turing
 
 ## Sintaxe
 
-O interpretador utiliza a seguinte sintáxe:
+O interpretador utiliza a seguinte sintáxe (Temporária, possivelmente
+mudará com a implementação final do interpretador):
 
 ### Incremento
 ```
@@ -65,3 +66,7 @@ Onde `norma` é o programa compilado.
 
 - Implementar uma versão melhorada do intepretador
 - Implementar avanço automático de linha
+- Reestruturar sintaxe (a atual não é muito prática)
+- Implementar as funções `add REG VALUE` e `sub REG VALUE` para facilitar
+
+

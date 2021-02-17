@@ -13,10 +13,27 @@ using namespace std;
 enum Operation {
     INC,
     DEC,
-    IF
+    ZERO,
+    FUNC,
+    NO_OP
 };
 
-typedef tuple<string,Operation,string,string> parsedOperation;
+enum LineType {
+    OPERATOR,
+    TEST,
+    ERROR
+};
+
+class ParsedOperation {
+public:
+    string lineId;
+    LineType lineType;
+    Operation operation;
+    string regName;
+    string nextLine;
+
+    ParsedOperation(string lineId,LineType lineType,Operation operation,string regName,string nextLine);
+};
 
 class Intepreter {
 public:
@@ -28,14 +45,21 @@ public:
 
     void setInput(uint64_t input);
 
+
 private:
     Machine *machine;
-    vector<parsedOperation> operationList;
+    vector<ParsedOperation*> mainOperationList;
 
-    parsedOperation parseLine(string line);
-    parsedOperation executeOperation(parsedOperation op);
-    string getPath(bool resultIf, string paths);
-    parsedOperation findNextOperation(string nextOperation);
+    ParsedOperation *parseLine(string line);
+
+    static LineType findTypeLine(const string& line);
+    static Operation findOperation(const string& line);
+    static string findRegName(const string& line, LineType lineType, Operation operation);
+    static string findNextLine(string line, LineType lineType);
+
+    ParsedOperation *executeOperation(ParsedOperation *op);
+    static string getPath(bool resultIf, string paths);
+    ParsedOperation *findNextOperation(string nextOperation);
 };
 
 

@@ -5,9 +5,28 @@
 #include <fstream>
 #include <tuple>
 #include <algorithm>
+#include <utility>
 #include "Intepreter.h"
 
 using namespace std;
+
+// Trim algorithm from http://www.martinbroadhurst.com/how-to-trim-a-stdstring.html
+std::string& ltrim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
+{
+    str.erase(0, str.find_first_not_of(chars));
+    return str;
+}
+
+std::string& rtrim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
+{
+    str.erase(str.find_last_not_of(chars) + 1);
+    return str;
+}
+
+std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
+{
+    return ltrim(rtrim(str, chars), chars);
+}
 
 Intepreter::Intepreter() {
     machine = new Machine();
@@ -20,16 +39,30 @@ int Intepreter::ReadFile(string fileName) {
     string line;
     while(!file.eof()){
         getline(file, line);
+
+        //Ignore empty lines
         if(line == "")
             continue;
 
+        //Remove spaces from beginning and ending
+        line = trim(line);
+
+        //Ignore comments
+        if (line.find("//") == 0)
+            continue;
+
+        //Make uppercase
         for (auto & c: line) c = toupper(c);
+
         auto parsedLine = parseLine(line);
-        if (parsedLine == parsedOperation()) {
+
+        if (parsedLine== nullptr) {
             file.close();
-            return -2; ///Bad line sintax
+            return -1;
         }
-        operationList.push_back(parsedLine);
+
+        mainOperationList.push_back(parsedLine);
+
     }
     file.close();
     return 0;
@@ -37,115 +70,137 @@ int Intepreter::ReadFile(string fileName) {
 
 uint64_t Intepreter::execute() {
 
-    parsedOperation actualOperation = operationList[0];
+    ParsedOperation *actualOperation = mainOperationList[0];
     do {
         actualOperation = executeOperation(actualOperation);
-    } while (actualOperation != parsedOperation());
+    } while (actualOperation != nullptr);
 
     return machine->finalResult();
 }
 
-void Intepreter::setInput(uint64_t input) {
-    machine->input(input);
+ParsedOperation *Intepreter::parseLine(string line) {
+    int begin=0,end=0;
+
+    //Get lineId
+    end=line.find_first_of(':');
+    string lineId = line.substr(begin,end);
+
+    //Get lineType
+    LineType lineType=findTypeLine(line);
+    if (lineType==ERROR)
+        return nullptr;
+
+    Operation operation=findOperation(line);
+    if (lineType==ERROR)
+            return nullptr;
+
+    //Get regName
+    string regName = findRegName(line, lineType, operation);
+    if (regName.empty())
+        return nullptr;
+
+    string nextLine = findNextLine(line, lineType);
+    if (nextLine.empty() || nextLine==";")
+        return nullptr;
+
+    return new ParsedOperation(lineId,lineType,operation,regName,nextLine);
 }
 
-
-parsedOperation Intepreter::parseLine(string line) {
-
-    int i=0;
-
-    string lineId = "";
-    for(;i!=line.size();i++) {
-        char c = line[i];
-        if(c==':') break;
-        // ignore spaces
-        if(c!=' ')
-            lineId.push_back(c);
-    }
-    if (lineId == line || lineId == "")
-        return parsedOperation();
-
-    i++;
-    string operationString  = "";
-    Operation operation;
-    // ignore spaces
-    for(;i!=line.size();i++) {
-        char c = line[i];
-        if(c!=' ') break;
-    }
-    // read operation
-    for(;i!=line.size();i++) {
-        char c = line[i];
-        if(c==' ') break;
-        operationString.push_back(c);
-    }
-    // convert to enum
-    if (operationString == "INC")
-        operation = INC;
-    else if (operationString == "DEC")
-        operation = DEC;
-    else if (operationString == "IF")
-        operation = IF;
-    else
-        return parsedOperation();
-
-    i++;
-    string param = "";
-    // ignore spaces
-    for(;i!=line.size();i++) {
-        char c = line[i];
-        if(c!=' ') break;
-    }
-    // read param
-    for(;i!=line.size();i++) {
-        char c = line[i];
-        if(c==' ') break;
-        param.push_back(c);
-    }
-    if (param == "" || i==line.size())
-        return parsedOperation();
-
-
-    string nextOperation = "";
-    // ignore spaces
-    for(;i!=line.size();i++) {
-        char c = line[i];
-        if(c!=' ') break;
-    }
-    for(;i!=line.size();i++) {
-        char c = line[i];
-        if(c==' ') break;
-        nextOperation.push_back(c);
-    }
-
-    if (param == ""){
-        return parsedOperation();
-    }
-
-    return parsedOperation(lineId, operation, param, nextOperation);
+LineType Intepreter::findTypeLine(const string& line) {
+    if(line.find("IF") != string::npos) {
+        return TEST;
+    } else if(line.find("DO") != string::npos) {
+        return OPERATOR;
+    } else return ERROR;
 }
 
-parsedOperation Intepreter::executeOperation(parsedOperation op) {
-    Operation operation = get<1>(op);
+Operation Intepreter::findOperation(const string &line) {
+    if(line.find("DO INC") != string::npos) {
+        return INC;
+    } else if(line.find("DO DEC") != string::npos) {
+        return DEC;
+    } else if(line.find("IF ZERO") != string::npos) {
+        return ZERO;
+    } else if(line.find('(') != string::npos) {
+        return FUNC;
+    }else return NO_OP;
+}
+
+string Intepreter::findRegName(const string &line, LineType lineType, Operation operation) {
+    string wordBefore, wordAfter;
+    int increment=0;
+    switch (operation) {
+        case INC:
+            wordBefore="INC";
+            increment=3; break;
+        case DEC:
+            wordBefore="DEC";
+            increment=3; break;
+        case ZERO:
+            wordBefore="ZERO";
+            increment=4; break;
+        case FUNC:
+        default:
+            wordBefore="(";
+            increment=1;
+    }
+
+    switch (lineType) {
+        case OPERATOR:
+            wordAfter="GOTO"; break;
+        case TEST:
+        default:
+            wordAfter="THEN"; break;
+    }
+
+    int begin=line.find(wordBefore)+increment;
+    int end=line.find(wordAfter);
+
+    string reg = line.substr(begin,end-begin);
+
+    return trim(reg);
+}
+
+string Intepreter::findNextLine(string line, LineType lineType) {
+    if (lineType==OPERATOR) {
+        int begin = line.find("GOTO")+4;
+        string nextLine = line.substr(begin);
+        return trim(nextLine);
+    }
+    else if (lineType==TEST) {
+        int beginFirst = line.find("THEN GOTO")+9;
+        int beginSecond = line.find("ELSE GOTO");
+        string nextLineTrue = line.substr(beginFirst, beginSecond-beginFirst);
+        nextLineTrue = trim(nextLineTrue);
+
+        beginSecond+=9;
+        string nextLineFalse = line.substr(beginSecond);
+        nextLineFalse = trim(nextLineFalse);
+
+        return nextLineTrue+";"+nextLineFalse;
+    }
+}
+
+ParsedOperation *Intepreter::executeOperation(ParsedOperation *op) {
+    Operation operation = op->operation;
     string nextOperation;
     bool resultIf;
     switch (operation) {
         case INC:
-            machine->inc(get<2>(op));
-            nextOperation = get<3>(op);
+            machine->inc(op->regName);
+            nextOperation = op->nextLine;
             break;
         case DEC:
-            machine->dec(get<2>(op));
-            nextOperation = get<3>(op);
+            machine->dec(op->regName);
+            nextOperation = op->nextLine;
             break;
-        case IF:
+        case ZERO:
         default:
-            resultIf = machine->isZero(get<2>(op));
-            nextOperation = getPath(resultIf, get<3>(op));
+            resultIf = machine->isZero(op->regName);
+            nextOperation = getPath(resultIf, op->nextLine);
     }
 
     return findNextOperation(nextOperation);
-
 }
 
 string Intepreter::getPath(bool resultIf, string paths) {
@@ -167,13 +222,24 @@ string Intepreter::getPath(bool resultIf, string paths) {
     return (resultIf) ? path1 : path2;
 }
 
-parsedOperation Intepreter::findNextOperation(string nextOperation) {
-    for(int i=0; i<operationList.size(); i++) {
-        if(get<0>(operationList[i]) == nextOperation) {
-            return operationList[i];
+ParsedOperation *Intepreter::findNextOperation(string nextOperation) {
+    for(int i=0; i<mainOperationList.size(); i++) {
+        if(mainOperationList[i]->lineId == nextOperation) {
+            return mainOperationList[i];
         }
     }
-
-    return parsedOperation();
+    return nullptr;
 }
 
+void Intepreter::setInput(uint64_t input) {
+    machine->input(input);
+}
+
+ParsedOperation::ParsedOperation(string lineId, LineType lineType, Operation operation, string regName,
+                                 string nextLine) {
+    this->lineId=std::move(lineId);
+    this->operation=operation;
+    this->nextLine=std::move(nextLine);
+    this->regName=std::move(regName);
+    this->lineType=lineType;
+}
