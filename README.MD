@@ -27,24 +27,23 @@ O poder computacional dessa máquina é equivalente a máquina de turing
 
 ## Sintaxe
 
-O interpretador utiliza a seguinte sintáxe (Temporária, possivelmente
-mudará com a implementação final do interpretador):
+O interpretador utiliza a seguinte sintaxe (A ser melhorada):
 
 ### Incremento
 ```
-id_linha: inc REG prox_linha
+id_linha: do inc REG goto prox_linha
 ```
 **lê-se:** *id_linha: incremente REG vá para prox_linha*
 
 ### Decremento
 ```
-id_linha: dec REG prox_linha
+id_linha: do dec REG goto prox_linha
 ```
 **lê-se:** *id_linha: decremente REG vá para prox_linha*
 
 ### Teste é_zero
 ```
-id_linha: if REG opcao1;opcao2
+id_linha: if zero REG then gotoopcao1 else goto opcao2
 ```
 **lê-se:** *id_linha: se REG é zero, vá para opcao1, senão vá para opcao2*
 
@@ -66,7 +65,6 @@ Onde `norma` é o programa compilado.
 
 - Implementar uma versão melhorada do intepretador
 - Implementar avanço automático de linha
-- Reestruturar sintaxe (a atual não é muito prática)
 - Implementar as funções `add REG VALUE` e `sub REG VALUE` para facilitar
 
 
