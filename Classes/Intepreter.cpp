@@ -177,7 +177,7 @@ bool Intepreter::findSubRotine(string params) {
 
     //Find subrotine and associate regs to params
     int i=0;
-    for (int i=0; i<subrotines.size();i++) {
+    for (i=0; i<subrotines.size();i++) {
         if (subrotines[i]->name==paramsList[0]) {
             for (int j=1;j<paramsList.size();j++) {
                 get<1>(subrotines[i]->registers[j-1])=paramsList[j];
@@ -187,11 +187,13 @@ bool Intepreter::findSubRotine(string params) {
     }
 
     actualSubrotine.push_back(subrotines[i]);
-    return executeSubrotine(subrotines[i]);
-
+    bool subRotineReturn = executeSubrotine();
+    actualSubrotine.pop_back();
+    return subRotineReturn;
 }
 
-bool Intepreter::executeSubrotine(Subrotine *subrotine) {
+bool Intepreter::executeSubrotine() {
+    auto subrotine = actualSubrotine.back();
     ParsedOperation *actualOperation = subrotine->operations[0];
     do {
         actualOperation = executeOperation(actualOperation, subrotine);

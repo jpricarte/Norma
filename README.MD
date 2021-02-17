@@ -87,7 +87,6 @@ Onde `norma` é o programa compilado.
 ## Melhorias esperadas
 
 - Implementar uma versão melhorada do intepretador
-- Implementar pilha de subrotinas
 - Implementar as funções `add REG VALUE` e `sub REG VALUE` para facilitar
 
 

@@ -65,7 +65,7 @@ private:
     int readSubrotine(ifstream* file,Subrotine* subrotine);
 
     bool findSubRotine(string params);
-    bool executeSubrotine(Subrotine* subrotine);
+    bool executeSubrotine();
     static string findRealRegister(string paramName, Subrotine *subrotine);
 
     ParsedOperation *executeOperation(ParsedOperation *op);
