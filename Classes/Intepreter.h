@@ -35,6 +35,15 @@ public:
     ParsedOperation(string lineId,LineType lineType,Operation operation,string regName,string nextLine);
 };
 
+class Subrotine {
+public:
+    string name;
+    vector<tuple<string, string>> registers;
+    vector<ParsedOperation*> operations;
+
+    Subrotine(const string &name, const string &registers);
+};
+
 class Intepreter {
 public:
     Intepreter();
@@ -49,17 +58,32 @@ public:
 private:
     Machine *machine;
     vector<ParsedOperation*> mainOperationList;
+    vector<Subrotine*> subrotines;
+    vector<Subrotine*> actualSubrotine;
 
-    ParsedOperation *parseLine(string line);
+    int readMain(ifstream* file);
+    int readSubrotine(ifstream* file,Subrotine* subrotine);
 
-    static LineType findTypeLine(const string& line);
-    static Operation findOperation(const string& line);
-    static string findRegName(const string& line, LineType lineType, Operation operation);
-    static string findNextLine(string line, LineType lineType);
+    bool findSubRotine(string params);
+    bool executeSubrotine(Subrotine* subrotine);
+    static string findRealRegister(string paramName, Subrotine *subrotine);
 
     ParsedOperation *executeOperation(ParsedOperation *op);
-    static string getPath(bool resultIf, string paths);
+    ParsedOperation *executeOperation(ParsedOperation *op, Subrotine *subrotine);
+
     ParsedOperation *findNextOperation(string nextOperation);
+    ParsedOperation *findNextOperation(string nextOperation, Subrotine *subrotine);
+
+    static ParsedOperation *parseLine(string line);
+    static vector<string> lineDivide(const string& line);
+    static string formatLineId(const string& idToken);
+    static LineType formatlineType(const string& lineTypeToken);
+    static Operation formatOperation(const string& operationToken);
+    static string formatParams(const string& functionToken);
+    static string formatNextLine(const string& firstLineId,const string& secondLineId);
+
+    static string getPath(bool resultIf, string paths);
+    static string formatLine(string line);
 };
 
 

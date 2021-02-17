@@ -27,7 +27,23 @@ O poder computacional dessa máquina é equivalente a máquina de turing
 
 ## Sintaxe
 
-O interpretador utiliza a seguinte sintaxe (A ser melhorada):
+O interpretador utiliza a seguinte sintaxe:
+
+### Main
+O código executado deve estar dentro do escopo da `main { }`
+
+### Subrotinas
+Para criar um escopo de subrotinas:
+```
+operation foo p1,p2,p3 {
+
+}
+```
+
+Onde os registradores serao associados a cada parâmetro.
+
+Para retornar true ou false, basta colocar esses valores como
+endereço da próxima instrução.
 
 ### Incremento
 ```
@@ -43,9 +59,16 @@ id_linha: do dec REG goto prox_linha
 
 ### Teste é_zero
 ```
-id_linha: if zero REG then gotoopcao1 else goto opcao2
+id_linha: if zero REG then goto opcao1 else goto opcao2
 ```
 **lê-se:** *id_linha: se REG é zero, vá para opcao1, senão vá para opcao2*
+
+### Chamada de função
+```
+id_linha: do foo a,b,c goto id1
+ou
+id_linha: if foo a,b,c then goto opcao1 else goto opcao2
+```
 
 ### Observações necessárias
 
@@ -64,7 +87,7 @@ Onde `norma` é o programa compilado.
 ## Melhorias esperadas
 
 - Implementar uma versão melhorada do intepretador
-- Implementar avanço automático de linha
+- Implementar pilha de subrotinas
 - Implementar as funções `add REG VALUE` e `sub REG VALUE` para facilitar
 
 
