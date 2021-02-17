@@ -79,7 +79,9 @@ int Intepreter::ReadFile(string fileName) {
         if (line.empty())
             continue;
 
-        if (line.find("OPERATION") != string::npos && line.find_first_of('{') != string::npos) {
+        if ((line.find("OPERATION") != string::npos || line.find("TEST") != string::npos ) &&
+             line.find_first_of('{') != string::npos)
+        {
             auto tokens = lineDivide(line);
             auto subrotine = new Subrotine(tokens[1], tokens[2]);
             subrotines.push_back(subrotine);
