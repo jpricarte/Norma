@@ -1,5 +1,8 @@
 #include <iostream>
-#include "Classes/Intepreter.h"
+#include "Intepreter/Intepreter.h"
+#include "Compiler/Compiler.h"
+
+using namespace std;
 
 int main(int argc, char** argv) {
     if(argc !=3) {
@@ -7,10 +10,11 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    auto *intepreter = new Intepreter();
+    auto *compiler = new Compiler();
 
-    int i = intepreter->ReadFile(argv[1]);
-    if(i < 0) return 2;
+    auto *intepreter = compiler->ReadFile(argv[1]);
+
+    if(intepreter == nullptr) return 2;
 
     intepreter->setInput(atoi(argv[2]));
     cout << intepreter->execute() << endl;
