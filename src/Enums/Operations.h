@@ -2,7 +2,15 @@
 // Created by pujol on 20/02/2021.
 //
 
-#ifndef NORMA_OPERATION_H
-#define NORMA_OPERATION_H
+#ifndef NORMA_OPERATIONS_H
+#define NORMA_OPERATIONS_H
 
-#endif //NORMA_OPERATION_H
+enum Operations {
+    INC,
+    DEC,
+    ZERO,
+    FUNC,
+    NO_OP
+};
+
+#endif //NORMA_OPERATIONS_H
