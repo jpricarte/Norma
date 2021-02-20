@@ -5,7 +5,7 @@ Implementação da máquina teórica Norma em C++.
 A implementação do Interpretador foi feita para facilitar testes da máquina,
 ele não é a versão que será usada na versão final.
 Portanto, ele não está otimizado, deve conter bugs e não possuí todas as
-verificações de sintáxe (por exemplo, não verifica se o go_to está escrito
+verificações de sintaxe (por exemplo, não verifica se o go_to está escrito
 corretamente).
 
 ## Uma breve explicação da máquina Norma
@@ -99,6 +99,7 @@ O programa (ou subrotina) acaba quando for chamada uma linha não existente.
 Em subrotinas, elas também acabam ao chegar em `goto true` ou `goto false`.
 
 ## Execução
+
 Após escrever seu código em um arquivo `.mn`, você poderá executa-lo usando:
 ```
 norma ARQUIVO.MN ENTRADA
@@ -110,4 +111,10 @@ Onde `norma` é o programa compilado.
 - Implementar uma versão melhorada do intepretador
 - Implementar as funções `add REG,VALUE`, `sub REG,VALUE`, `cmp REG,VALUE` para facilitar.
 
+## Refatoração em andamento
 
+A versão original desse programa foi escrita em uma tarde no modelo XGH,
+então claramente o código não foi feito de forma muito legível.
+Estou refatorando o código aos poucos, mas caso algo no código esteja confuso ou
+ilegível, coloque como issue ou mande um pull request com a mudança, que ela será
+muito bem vinda!
