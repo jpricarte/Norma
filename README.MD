@@ -113,8 +113,6 @@ Onde `norma` é o programa compilado.
 
 ## Refatoração em andamento
 
-A versão original desse programa foi escrita em uma tarde no modelo XGH,
-então claramente o código não foi feito de forma muito legível.
 Estou refatorando o código aos poucos, mas caso algo no código esteja confuso ou
 ilegível, coloque como issue ou mande um pull request com a mudança, que ela será
 muito bem vinda!
